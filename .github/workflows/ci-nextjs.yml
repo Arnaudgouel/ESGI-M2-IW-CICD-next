@@ -1,0 +1,44 @@
+name: CI for Next.js
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: 🛠️ Test Next.js Routes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run linting
+        run: npm run lint -- --no-cache
+
+      - name: Start Next.js server
+        run: npm run build && npm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for server to start
+        run: sleep 5
+
+      - name: Test /hello route
+        run: |
+          RESPONSE=$(curl -s http://localhost:3000/hello)
+          echo "Server response: $RESPONSE"
+          if [[ "$RESPONSE" != *"<h1>Hello, World!</h1>"* ]]; then
+            echo "Test failed: Expected '<h1>Hello World</h1>' but got '$RESPONSE'"
+            exit 1
+          fi
+        shell: bash
