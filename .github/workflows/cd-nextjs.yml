@@ -30,7 +30,7 @@ jobs:
           mkdir -p release
           cp -r .next release/
           cp package.json release/
-          cp next.config.js release/
+          cp next.config.mjs release/
         shell: bash
 
       - name: 📤 Upload build artifact
