@@ -1,0 +1,77 @@
+name: 🚀 CD - Create GitHub Pre-Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_run:
+    workflows: ["CI for Next.js"]  # Le nom du workflow CI
+    types:
+      - completed
+
+jobs:
+  build:
+    name: 🏗️ Build Next.js
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Vérifie si la CI a réussi
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🏗️ Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🏗️ Build the project
+        run: npm run build
+
+      - name: 📦 Archive build artifacts
+        run: |
+          mkdir -p release
+          cp -r .next release/
+          cp package.json release/
+          cp next.config.js release/
+        shell: bash
+
+      - name: 📤 Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nextjs-build
+          path: release/
+
+  pre-release:
+    name: 🚀 Create GitHub Pre-Release
+    needs: build  # Attendre que le build réussisse
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔖 Generate tag version
+        id: tag
+        run: echo "TAG_NAME=v0.1-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
+      - name: 📥 Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: nextjs-build
+          path: release/
+
+      - name: 🚀 Create GitHub Pre-Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: "Pre-Release ${{ env.TAG_NAME }}"
+          body: "🚀 Pre-Release auto-générée après CI réussie"
+          draft: false
+          prerelease: true
+          files: |
+            release/.next/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
