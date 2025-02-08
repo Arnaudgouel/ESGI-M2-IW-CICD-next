@@ -57,16 +57,5 @@ jobs:
         with:
           name: nextjs-build
           path: release/
-
-      - name: 🚀 Create GitHub Pre-Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          name: "Pre-Release ${{ env.TAG_NAME }}"
-          body: "🚀 Pre-Release auto-générée après CI réussie"
-          draft: false
-          prerelease: true
-          files: |
-            release/.next/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
