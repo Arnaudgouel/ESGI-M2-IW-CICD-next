@@ -9,7 +9,6 @@ jobs:
   build:
     name: 🏗️ Build Next.js
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Vérifie si la CI a réussi
 
     steps:
       - name: 📥 Checkout repository
