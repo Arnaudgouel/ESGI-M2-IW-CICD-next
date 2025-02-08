@@ -1,4 +1,4 @@
-name: 🚀 CD - Create GitHub Pre-Release
+name: 🚀 CD - Create GitHub package
 
 on:
   push:
@@ -7,25 +7,25 @@ on:
 
 jobs:
   build:
-    name: 🏗️ Build Next.js
+    name: Build Next.js
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🏗️ Install Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: 🏗️ Build the project
+      - name: Build the project
         run: npm run build
 
-      - name: 📦 Archive build artifacts
+      - name: Archive build artifacts
         run: |
           mkdir -p release
           cp -r .next release/
@@ -33,24 +33,20 @@ jobs:
           cp next.config.mjs release/
         shell: bash
 
-      - name: 📤 Upload build artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: nextjs-build
           path: release/
 
   pre-release:
-    name: 🚀 Create GitHub Pre-Release
+    name: Create GitHub package
     needs: build  # Attendre que le build réussisse
     runs-on: ubuntu-latest
 
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
-
-      - name: 🔖 Generate tag version
-        id: tag
-        run: echo "TAG_NAME=v0.1-$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: 📥 Download build artifact
         uses: actions/download-artifact@v4
